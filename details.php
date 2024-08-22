@@ -5,51 +5,53 @@ require 'config/database.php';
 $db = new Database();
 $con = $db->conectar();
 
-$id = isset ($_GET['id']) ? $_GET['id'] : '';
-$token = isset ($_GET['token']) ? $_GET['token'] : '';
+$id = isset($_GET['id']) ? $_GET['id'] : '';
+$token = isset($_GET['token']) ? $_GET['token'] : '';
 
-    if($id == '' || $token == ''){
-        echo 'error al procesar la peticion';
-        exit;
-    } else {
-     $token_tmp = hash_hmac('sha1', $id, KEY_TOKEN);
+if ($id == '' || $token == '') {
+    echo 'Error al procesar la petición';
+    exit;
+} else {
+    $token_tmp = hash_hmac('sha1', $id, KEY_TOKEN);
 
-    if($token == $token_tmp){
-        $sql= $con->prepare("SELECT count(id) FROM productos WHERE id=? AND activo=1");
+    if ($token == $token_tmp) {
+        $sql = $con->prepare("SELECT COUNT(id) FROM productos WHERE id=? AND activo=1");
         $sql->execute([$id]);
-        if($sql->fetchColumn() > 0){
-            $sql= $con->prepare("SELECT nombre, descripción, precio, descuento FROM productos WHERE id=? AND activo=1 
-            LIMIT 1");
+
+        if ($sql->fetchColumn() > 0) {
+            $sql = $con->prepare("SELECT nombre, descripción, precio FROM productos WHERE id=? AND activo=1 LIMIT 1");
             $sql->execute([$id]);
             $row = $sql->fetch(PDO::FETCH_ASSOC);
-            $nombre = $row['nombre'];
-            $descripción = $row['descripción'];
-            $precio = $row['precio'];
-            $descuento = $row['descuento'];
-            $precio_descuento = $precio - (($precio * $descuento) /100);
-            $directorio_images = 'images/productos/' . $id . '/';
-            $ruta_Img = $directorio_images . 'producto.png';
-        }
-        if(!file_exists($ruta_Img)){
-            $ruta_img = 'images/no-photo.jpg';
-        }
-        $imagenes = array();
-        $dir = dir($directorio_images);
 
-            while(($archivo = $dir->read()) != false){
-                if($archivo != 'producto.png' && (strpos($archivo, 'png') || strpos($archivo, 'pneg'))) {
-                $imagenes[] = $directorio_images . $archivo; 
+            $nombre = $row['nombre'];
+            $descripcion = $row['descripción'];
+            $precio = $row['precio'];
+
+            $directorio_images = 'images/producto/' . $id . '/';
+            $ruta_img = $directorio_images . 'producto.png';
+
+            if (!file_exists($ruta_img)) {
+                $ruta_img = 'images/no-photo.jpg';
+            }
+
+            $imagenes = array();
+            $dir = dir($directorio_images);
+
+            while (($archivo = $dir->read()) !== false) {
+                if ($archivo != 'producto.png' && (strpos($archivo, 'png') || strpos($archivo, 'jpg'))) {
+                    $imagenes[] = $directorio_images . $archivo;
                 }
             }
             $dir->close();
+        } else {
+            echo 'Error: Producto no encontrado o inactivo.';
+            exit;
         }
-    }else{
-        echo 'Error: Producto no encontrado o inactivo.';
+    } else {
+        echo 'Error al procesar la petición.';
         exit;
     }
-  
-
-
+}
 
 ?>
 
@@ -59,13 +61,12 @@ $token = isset ($_GET['token']) ? $_GET['token'] : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda Online</title>
-
+    <title><?php echo htmlspecialchars($nombre); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" 
     rel="stylesheet" 
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" 
     crossorigin="anonymous">
-    <link href=estilos.css rel="stylesheet">
+    <link href="estilos.css" rel="stylesheet">
 </head>
 <body>
     
@@ -77,18 +78,18 @@ $token = isset ($_GET['token']) ? $_GET['token'] : '';
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
-      </button>jijo
-
+      </button>
       <div class="collapse navbar-collapse" id="navbarHeader">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a href="#" class="nav-link active">Catalogo</a>
+            <a href="#" class="nav-link active">Catálogo</a>
           </li>
-
           <li class="nav-item">
             <a href="#" class="nav-link">Contacto</a>
+          </li>
         </ul>
-            <a href="carrito.php" class="btn btn-primary">Carrito</a>    
+        <a href="carrito.php" class="btn btn-primary">Carrito</a>
+      </div>
     </div>
   </div>
 </header>
@@ -96,49 +97,41 @@ $token = isset ($_GET['token']) ? $_GET['token'] : '';
 <main>
     <div class="container">
         <div class="row">
-            <div class="col-md-6-order-md-1">
-
-            <div id="carouselImages" class="carousel slide">
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="<?php echo $ruta_img;?>" class="d-block w-100">
-    </div>
-    <?php foreach($imagenes as $img) {?>
-    <?php } ?>
-    <div class="carousel-item">
-    <img src="<?php echo $img;?>" class="d-block w-100">
-    </div>
-    
-  </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselImages" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselImages" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </button>
-</div>
-                
-            </div>
-            <div class="col-md-6-order-md-2">
-                <h2><?php echo $nombre; ?></h2>
-                <h2><?php echo MONEDA . number_format($precio, 2, '.', ','); ?></h2>
-                <p class="lead">
-                    <?php echo $descripción; ?>
-                </p>
-
-                <div class="g-grid gap-3 col-10 mx-auto">
-                    <buttom class="btn btn-primary" type="button">Comprar ahora</buttom>
-                    <buttom class="btn btn-outline-primary" type="button">Agregar al carrito</buttom>
-
-
+            <div class="col-md-6 order-md-1">
+                <div id="carouselImages" class="carousel slide">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="<?php echo $ruta_img; ?>" class="d-block w-100" alt="Imagen principal del producto">
+                        </div>
+                        <?php foreach ($imagenes as $img) { ?>
+                            <div class="carousel-item">
+                                <img src="<?php echo $img; ?>" class="d-block w-100" alt="Imagen adicional del producto">
+                            </div>
+                        <?php } ?>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselImages" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselImages" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Siguiente</span>
+                    </button>
                 </div>
             </div>
-
+            <div class="col-md-6 order-md-2">
+                <h2><?php echo htmlspecialchars($nombre); ?></h2>
+                <h3><?php echo MONEDA . number_format($precio, 2, '.', ','); ?></h3>
+                <p class="lead">
+                    <?php echo nl2br(htmlspecialchars($descripcion)); ?>
+                </p>
+                <div class="g-grid gap-3 col-10 mx-auto">
+                    <button class="btn btn-primary" type="button">Comprar ahora</button>
+                    <button class="btn btn-outline-primary" type="button">Agregar al carrito</button>
+                </div>
+            </div>
         </div>
     </div>
-  
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
