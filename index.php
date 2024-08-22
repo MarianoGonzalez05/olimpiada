@@ -9,6 +9,10 @@ $sql= $con->prepare("SELECT id, nombre, precio FROM productos WHERE activo=1");
 $sql->execute();
 $resultado=$sql->fetchAll(PDO::FETCH_ASSOC);
 
+session_destroy();
+
+print_r($_SESSION);
+
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +49,9 @@ $resultado=$sql->fetchAll(PDO::FETCH_ASSOC);
             <a href="#" class="nav-link">Contacto</a>
           </li>
         </ul>
-        <a href="carrito.php" class="btn btn-primary">Carrito</a>    
+        <a href="carrito.php" class="btn btn-primary">
+            Carrito<span id="num_cart" class="badge bg-secondary"><?php echo $num_cart; ?></span>
+        </a>    
       </div>
     </div>
   </div>
@@ -72,7 +78,7 @@ $resultado=$sql->fetchAll(PDO::FETCH_ASSOC);
                 <div class="btn-group">
                  <a href="details.php?id=<?php echo $row['id']; ?>&token=<?php echo hash_hmac('sha1', $row['id'], KEY_TOKEN); ?>" class="btn btn-primary">Detalles</a>
                 </div>
-                <a href="#" class="btn btn-success">Agregar</a>
+                <button class="btn btn-outline-success" type="button" onclick="addProducto(<?php echo $row['id']; ?>, '<?php echo hash_hmac('sha1', $row['id'], KEY_TOKEN); ?>')">Agregar al carrito</button>
               </div>
             </div>
           </div>
@@ -85,5 +91,27 @@ $resultado=$sql->fetchAll(PDO::FETCH_ASSOC);
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
 integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" 
 crossorigin="anonymous"></script>
+
+<script>
+    function addProducto(id, token){
+        let url ='clases/carrito.php'
+        let formData = new FormData()
+        formData.append('id', id)
+        formData.append('token', token)
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            mode: 'cors'
+        }).then(response => response.json())
+        .then(data => {
+            if(data.ok){
+                let elemento = document.getElementById("num_cart")
+                elemento.innerHTML = data.numero
+            }
+        })
+    }
+</script>
+
 </body>
 </html>
