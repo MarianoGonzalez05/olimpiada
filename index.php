@@ -9,9 +9,9 @@ $sql= $con->prepare("SELECT id, nombre, precio FROM productos WHERE activo=1");
 $sql->execute();
 $resultado=$sql->fetchAll(PDO::FETCH_ASSOC);
 
-session_destroy();
+//session_destroy();
 
-print_r($_SESSION);
+
 
 ?>
 
@@ -26,6 +26,7 @@ print_r($_SESSION);
     rel="stylesheet" 
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" 
     crossorigin="anonymous">
+    <link href="css/all.mim.css" rel="stylesheet">
     <link href="estilos.css" rel="stylesheet">
 </head>
 <body>
@@ -49,9 +50,15 @@ print_r($_SESSION);
             <a href="#" class="nav-link">Contacto</a>
           </li>
         </ul>
-        <a href="checkout.php" class="btn btn-primary">
-            Carrito<span id="num_cart" class="badge bg-secondary"><?php echo $num_cart; ?></span>
+        <a href="checkout.php" class="btn btn-primary me-2">
+            Carrito<span id="num_cart" class="badge bg-secondary "><?php echo $num_cart; ?></span>
         </a>    
+
+        <?php if(isset($_SESSION['user_id'])) { ?>
+        <a href="#" class="btn btn-success">  <?php echo $_SESSION['user_name']; ?>  </a>
+        <?php }else{ ?>
+          <a href="login.php" class="btn btn-success"> Ingresar </a> 
+          <?php } ?>
       </div>
     </div>
   </div>

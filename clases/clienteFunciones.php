@@ -21,3 +21,22 @@ function registraUsuario(array $datos, $con){
     }
     return false;
 }
+
+
+function login($usuario, $password, $con) {
+    $sql = $con->prepare("SELECT id, usuario, password FROM usuarios WHERE usuario = ? LIMIT 1");
+    $sql->execute([$usuario]);
+    
+    if ($row = $sql->fetch(PDO::FETCH_ASSOC)) {
+        if (password_verify($password, $row['password'])) {
+            $_SESSION['user_id'] = $row['id'];
+            $_SESSION['user_name'] = $row['usuario'];
+            header("Location: index.php");
+            exit;
+        } else {
+            return 'La contraseña es incorrecta.';
+        }
+    } else {
+        return 'El usuario no existe.';
+    }
+}

@@ -4,52 +4,32 @@
 }
   </style>
 <?php
-
 require 'config/database.php';
 require 'config/config.php';
 require 'clases/clienteFunciones.php';
+
+
+
+
 $db = new Database();
 $con = $db->conectar();
 
 $errors = [];
 
-if(!empty($_POST)){
-
-    $nombres = trim($_POST['nombres']);
-    $apellidos = trim($_POST['apellidos']);
-    $email = trim($_POST['email']);
-    $telefono = trim($_POST['telefono']);
-    $dni = trim($_POST['dni']);
+if (!empty($_POST)) {
     $usuario = trim($_POST['usuario']);
     $password = trim($_POST['password']);
-    $repassword = trim($_POST['repassword']);
 
-    if ($password !== $repassword) {
-        $errors[] = "Las contraseñas no coinciden.";
-    }
-
-    $id = registraCliente([$nombres, $apellidos, $email, $telefono, $dni], $con);
-
-    if($id > 0){
-        $pass_hash = password_hash($password, PASSWORD_DEFAULT);
-        $token = generarToken();
-        $password_request = ''; // Valor predeterminado para password_request
-        if(!registraUsuario([$usuario, $pass_hash, $token, $id, $password_request], $con)) {
-            $errors[] = "error al registrar usuario";
-        }        
+    if (empty($usuario) || empty($password)) {
+        $errors[] = "Debe llenar todos los campos.";
     } else {
-        $errors[] = "error al registrar";
-    }
-
-    if(count($errors) == 0){
-        echo "Registro exitoso";
-    } else {
-        print_r($errors);
+        $errorMessage = login($usuario, $password, $con);
+        if ($errorMessage) {
+            $errors[] = $errorMessage;
+        }
     }
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,11 +77,11 @@ if(!empty($_POST)){
   <form class="row g-3" action="login.php" method="post" autocomplete="off">
       
   <div class="form-floating">
-        <input class="form-control" type="text" name="usuario" id="usuario" placeholder="usuario">
+        <input class="form-control" type="text" name="usuario" id="usuario" placeholder="usuario" required>
         <label for="usuario">Usuario</label>
 </div>
 <div class="form-floating">
-        <input class="form-control" type="password" name="password" id="password" placeholder="Contraseña">
+        <input class="form-control" type="password" name="password" id="password" placeholder="Contraseña" required>
         <label for="password">Contraseña </label>
 </div>
       
