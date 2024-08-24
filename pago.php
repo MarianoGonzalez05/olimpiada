@@ -6,7 +6,6 @@ $con = $db->conectar();
 
 $productos = isset($_SESSION['carrito']['productos']) ? $_SESSION['carrito']['productos']: null;
 
-print_r($_SESSION);
 $lista_carrito = array ();
 
 if($productos != null){
@@ -72,6 +71,7 @@ if($productos != null){
     <div class="row">
      <div class="col-6">
         <h4>Detalles de pago</h4>
+        <div id="paypal-button-container"></div>
     </div>
 
     <div class="col-6">
@@ -108,9 +108,8 @@ if($productos != null){
                 <?php } ?>
 
                 <tr> 
-                    <td colspan="3"></td>
                     <td colspan="2">
-                        <p class="h3" id="total"><?php echo MONEDA . number_format($total, 2, '.', ',');?></p>
+                        <p class="h3 text-end" id="total"><?php echo MONEDA . number_format($total, 2, '.', ',');?></p>
                     </td>
                 </tr>
 
@@ -128,6 +127,42 @@ if($productos != null){
 integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" 
 crossorigin="anonymous"></script>
 
+
+
+<script src="https://www.paypal.com/sdk/js?client-id=<?php echo CLIENT_ID;?>&currency=<?php echo CURRENCY;?>"></script>
+
+
+<script>
+        paypal.Buttons({
+            style: {
+                color: 'blue',
+                shape: 'pill',
+                label: 'pay'
+            },
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: <?php echo $total;?>  
+                        }
+                    }]
+                });
+            },
+            
+            onApprove: function(data, actions) {
+                let URL = 'clases/captura.php'
+                 actions.order.capture().then(function(detalles) {
+                    console.log(detalles);
+                });
+            },
+
+            onCancel: function(data) {
+                alert("Pago cancelado");
+                console.log(data);
+            }
+        }).render('#paypal-button-container');
+    </script>
+    
 
 </body>
 </html>
