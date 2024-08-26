@@ -6,7 +6,6 @@ $con = $db->conectar();
 
 $productos = isset($_SESSION['carrito']['productos']) ? $_SESSION['carrito']['productos']: null;
 
-print_r($_SESSION);
 $lista_carrito = array ();
 
 if($productos != null){
@@ -15,8 +14,8 @@ if($productos != null){
         id=? AND activo=1");
         $sql->execute([$clave]);
         $lista_carrito[] = $sql->fetch(PDO::FETCH_ASSOC);
-    }
-    session_destroy();
+    } 
+    //session_destroy();
 }
 
 
@@ -118,11 +117,13 @@ if($productos != null){
         <?php } ?>
         </table>
     </div>
+
+    <?php if($lista_carrito != null){ ?>
     <div class="row">
         <div class="col-md-5 offset-md-7 d-grid gap-2">
-            <button class="btn btn-primary btn-lg">Realizar Pago</button>
+            <a href="pago.php" class="btn btn-primary btn-lg">Realizar Pago</a>
         </div>
-    
+    <?php } ?> 
     
   </div>
 </main>
