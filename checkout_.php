@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
-    
-<script src="https://sandbox.paypal.com/sdk/js?client-id=ARFAg0j2rr9yURfj1N9sYUaEHU-ZC3AUuBY5q-QnvrJ0Vr2MptiSyuUwCAqcIa7aHc547GQ5cj-EnLF6"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=ARFAg0j2rr9yURfj1N9sYUaEHU-ZC3AUuBY5q-QnvrJ0Vr2MptiSyuUwCAqcIa7aHc547GQ5cj-EnLF6"></script>
 
 </head>
 <body>
@@ -15,22 +14,30 @@
 
     <script>
         paypal.Buttons({
-            style:{
+            style: {
                 color: 'blue',
                 shape: 'pill',
                 label: 'pay'
             },
-            createOrder: function(data, actions){
-                return actions.create.order.create({
+            createOrder: function(data, actions) {
+                return actions.order.create({
                     purchase_units: [{
                         amount: {
-                            value: 50
+                            value: '50.00'  
                         }
                     }]
                 });
             },
-            onCancel: function(data){
-                alert("Pago cancelado")
+            
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(detalles) {
+                    window.location.href="completado.html"
+                });
+            },
+
+            onCancel: function(data) {
+                alert("Pago cancelado");
+                console.log(data);
             }
         }).render('#paypal-button-container');
     </script>
